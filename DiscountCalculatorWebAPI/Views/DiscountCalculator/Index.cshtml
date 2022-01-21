@@ -1,0 +1,138 @@
+﻿@model DiscountCalculatorWebAPI.Models.DiscountCalculatorModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+
+
+    @*<div class="form-horizontal">
+        <div class="form-group">
+            <div class="col-lg-offset-2 col-lg-10">
+                <input type="button" id="LogOut" value="Log Out" class="btn btn-success"/>
+            </div>
+        </div>
+    </div>*@
+
+    <div class="form-horizontal">
+
+        <h4>Discount Calculator</h4>
+        <hr />
+
+        <div class="form-group">
+            <div class="col-lg-offset-2 col-lg-10">
+                <input type="button" id="CalculatedTotalAfterDiscount" class="btn btn-success" />
+            </div>
+        </div>
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.GoldPricePerGram, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.GoldPricePerGram, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.GoldPricePerGram, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ItemWeight, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ItemWeight, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ItemWeight, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Discount, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Discount, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Discount, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Get Discount result" id="CalculateDiscount" class="btn btn-success" />
+            </div>
+        </div>
+    </div>
+
+
+
+
+    @section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+        <script type="text/javascript">
+
+            $(document).ready(function (e) {
+
+                $('#CalculatedTotalAfterDiscount').hide();
+
+                $('#CalculateDiscount').on('click', function (e) {
+
+                    if ($('#GoldPricePerGram').val().trim() != "" && $('#ItemWeight').val().trim() != "") {
+
+                        var regex = /^(\+|-)?(\d*\.?\d*)$/;
+
+                        var a = new RegExp(regex)
+
+                        if ($('#GoldPricePerGram').val().length > 8 || $('#ItemWeight').val().length > 8
+                        ) {
+                            alert("only 7 digits numers are allowed.");
+                            return;
+                        }
+                        if ($('#Discount').val().length > 4) {
+                            alert("only 3 digits numers are allowed. in discount field.");
+                            return;
+                        }
+
+                        if (!a.test($('#GoldPricePerGram').val().trim())
+                            || !a.test($('#ItemWeight').val().trim())
+                            || !a.test($('#Discount').val().trim())) {
+                            alert("please enter valid decimal numbers");
+                            return;
+                        }
+                        else {
+                            $.ajax({
+                                url: '/api/ApiAuthenication?GoldPricePerGram=' + $('#GoldPricePerGram').val() + "&ItemWeight=" + $('#ItemWeight').val() + "&Discount=" + $('#Discount').val(),
+                                type: "GET",
+                                contentType: "application/json",
+                                dataType: "json",
+                                success: function (result) {
+                                    // On success, 'data' contains a list of products.
+                                    $('#CalculatedTotalAfterDiscount').show()
+                                    $('#CalculatedTotalAfterDiscount').val("Total after discount = " + result);
+
+                                },
+                                error: function (err) {
+                                    alert(err.statusText);
+                                    return;
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        alert("please enter Gold Price Per Gram &  weight of the item");
+                        return;
+                    }
+                });
+
+
+                $("#LogOut").on('click', function (e) {
+                    $.ajax({
+                        url: '/DiscountCalculator/LogOut',
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (result) {
+                            alert("Successfullt Logged Out");
+                            window.location.href = "/Login/LoginView";
+                        },
+                        error: function (err) {
+                            alert(err.statusText);
+                            return;
+                        }
+                    });
+                });
+            });
+        </script>
+    }
